@@ -1,0 +1,15 @@
+name: Feature request / Sugestão
+description: Ideas, new devices, improvements / Ideias, novos aparelhos, melhorias
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like? / O que você gostaria?
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device, if any / Aparelho, se houver
+      description: If you own the device and can test it, say so! / Se você tem o aparelho e pode testar, conte!

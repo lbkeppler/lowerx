@@ -1,0 +1,31 @@
+name: Bug report / Relato de bug
+description: Something isn't working / Algo não está funcionando
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened? / O que aconteceu?
+      description: What you did, what you expected and what happened instead. / O que você fez, o que esperava e o que aconteceu.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device / Aparelho
+      placeholder: HyperX Cloud Stinger 2 Wireless
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version / Versão do macOS
+      placeholder: "15.3"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (optional / opcional)
+      description: "`/usr/bin/log show --last 5m --predicate 'subsystem == \"dev.local.lowerx\"'`"
+      render: text
