@@ -23,8 +23,8 @@
 - **Micrófono**: muestra en tiempo real si está silenciado (brazo levantado).
 - **Sidetone**: encendido/apagado y dos niveles, **Padrão** (Estándar, −25 dB, de fábrica) y **Otimizado** (Optimizado, −12 dB).
 - **Apagado automático**: nunca, 10, 20 o 30 minutos.
-- **Ecualizador de 10 bandas** con los presets oficiales de NGENUITY (Más graves, Menos graves, Más agudos, Menos agudos, Voz, Juegos, Equilibrado) y un modo personalizado: arrastra los puntos del gráfico.
-- **Espacial**: la música y los videos en estéreo suenan como altavoces frente a ti (HRTF de Apple).
+- **Ecualizador de 10 bandas** (funciona en cualquier auricular o altavoz) con los presets oficiales de NGENUITY (Más graves, Menos graves, Más agudos, Menos agudos, Voz, Juegos, Equilibrado) y un modo personalizado: arrastra los puntos del gráfico.
+- **Espacial** (cualquier auricular): la música y los videos en estéreo suenan como altavoces frente a ti (HRTF de Apple).
 - **Salida 7.1**: una salida de sonido virtual de 8 canales. Los juegos y películas en 7.1 tienen cada canal ubicado en 3D en el headset.
 - **Certificación en Discord**: Discord reconoce el headset, como lo hace con NGENUITY en Windows.
 - **Otros dispositivos HyperX**: reconoce 56 modelos (159 IDs USB) y muestra la foto de cada uno. Todavía no tienen controles.
@@ -41,6 +41,7 @@ Por ahora la interfaz está en portugués (pt-BR). [¡Las traducciones son bienv
 | Dispositivo | Estado |
 |---|---|
 | HyperX Cloud Stinger 2 Wireless | ✅ Completo |
+| Cualquier auricular o altavoz | 🎧 Ecualizador y espacial (la salida 7.1 sigue siendo solo del Stinger 2) |
 | Otros 55 modelos HyperX (headsets, teclados, ratones, micrófonos, alfombrillas) | 🔍 Detectados con nombre y foto, aún sin controles. [¡Contribuciones bienvenidas!](#contribuir) |
 
 ## Requisitos
@@ -138,7 +139,7 @@ tools/                    scripts para regenerar el catálogo, las imágenes y e
 Algunas ideas:
 
 - **Otros dispositivos HyperX.** Los protocolos están en NGENUITY: descompila `NGenuity2Helper.exe` con `ilspycmd`; las clases de cada dispositivo están en `NGenuity2.Devices.*`. Si tienes el dispositivo, impleméntalo, pruébalo y envía un PR. Empieza por las lecturas (batería, estado) antes de los comandos de escritura.
-- **EQ, espacial y salida 7.1 para cualquier auricular**, no solo el Stinger 2.
+- **Salida 7.1 en otros auriculares**: funciona en el Stinger 2; las pruebas en otros auriculares son bienvenidas.
 - **Traducciones de la interfaz**, que por ahora está en portugués.
 - **Errores y sugerencias**: abre un issue.
 

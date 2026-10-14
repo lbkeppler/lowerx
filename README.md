@@ -23,8 +23,8 @@
 - **Microphone**: shows in real time whether it is muted (boom raised).
 - **Sidetone**: on/off plus two levels, **Padrão** (Standard, −25 dB, factory) and **Otimizado** (Optimized, −12 dB).
 - **Auto power-off**: never, 10, 20 or 30 minutes.
-- **10-band equalizer** with NGENUITY's official presets (Bass Boost, Bass Cut, Treble Boost, Treble Cut, Voice Chat, Gaming, Balanced) and a custom mode: drag the points on the graph.
-- **Spatial**: stereo music and video sound like speakers in front of you (Apple's HRTF).
+- **10-band equalizer** (works on any headphones or speakers) with NGENUITY's official presets (Bass Boost, Bass Cut, Treble Boost, Treble Cut, Voice Chat, Gaming, Balanced) and a custom mode: drag the points on the graph.
+- **Spatial** (any headphones): stereo music and video sound like speakers in front of you (Apple's HRTF).
 - **7.1 output**: a virtual 8-channel sound output. Games and movies in 7.1 get each channel placed in 3D on the headset.
 - **Discord certification**: Discord recognizes the headset, as it does with NGENUITY on Windows.
 - **Other HyperX devices**: recognizes 56 models (159 USB IDs) and shows a photo of each. They have no controls yet.
@@ -41,6 +41,7 @@ The interface is currently in Portuguese (pt-BR). [Translations are welcome!](#c
 | Device | Status |
 |---|---|
 | HyperX Cloud Stinger 2 Wireless | ✅ Full support |
+| Any headphones or speakers | 🎧 Equalizer and spatial (7.1 output is still Stinger 2 only) |
 | 55 other HyperX models (headsets, keyboards, mice, microphones, mouse pads) | 🔍 Detected with name and photo, no controls yet. [Contributions welcome!](#contributing) |
 
 ## Requirements
@@ -138,7 +139,7 @@ Improvements are very welcome, and so are pull requests! 🙌
 Some ideas:
 
 - **Other HyperX devices.** The protocols are in NGENUITY: decompile `NGenuity2Helper.exe` with `ilspycmd`; each device's classes live in `NGenuity2.Devices.*`. If you own the device, implement it, test it and send a PR. Start with reads (battery, status) before write commands.
-- **EQ, spatial and 7.1 output for any headphones**, not just the Stinger 2.
+- **7.1 output on other headphones**: it works on the Stinger 2; testing on other headphones is welcome.
 - **UI translations**: the interface is currently in Portuguese.
 - **Bugs and suggestions**: open an issue.
 

@@ -4,9 +4,11 @@ import Foundation
 import Observation
 import os
 
-/// Estado do EQ, do espacial e da saída 7.1 no painel. Liga o `SystemAudioEQ` quando
-/// a saída do Mac é a "LowerX 7.1" (sempre: senão nada tocaria) ou quando ela é o
-/// Stinger e algum efeito está ativo; fora isso não existe tap nenhum.
+/// Estado do EQ, do espacial e da saída 7.1. EQ e espacial funcionam em qualquer saída
+/// de som (o áudio é processado na própria saída). A Saída 7.1 toca só no Stinger,
+/// o único fone em que ela foi validada. O `SystemAudioEQ` liga quando a saída do Mac
+/// é a "LowerX 7.1" (sempre: senão nada tocaria) ou quando algum efeito está ativo;
+/// fora isso não existe tap nenhum.
 @Observable
 @MainActor
 final class AudioEffects {
@@ -18,8 +20,7 @@ final class AudioEffects {
 
     enum State: Equatable {
         case off
-        case notStingerOutput
-        /// Saída 7.1 escolhida, mas o headset não está conectado.
+        /// Saída 7.1 escolhida, mas o Stinger não está conectado.
         case stingerMissing
         case waitingPermission
         case denied
@@ -48,6 +49,9 @@ final class AudioEffects {
             if selection == .custom { update() }
         }
     }
+
+    /// Nome da saída em que os efeitos estão sendo aplicados.
+    private(set) var outputName: String?
 
     /// Driver da saída 7.1 instalado.
     private(set) var surroundInstalled = false
@@ -108,13 +112,13 @@ final class AudioEffects {
             }
         }
         let output = AudioDevices.defaultOutputUID()
-        usingSurround = output == AudioDevices.surroundUID || output == AudioDevices.legacySurroundUID
+        usingSurround = output.map(AudioDevices.isSurround) ?? false
+        // A 7.1 toca no Stinger; EQ e espacial, na saída que estiver escolhida.
+        let target = usingSurround ? AudioDevices.stingerUID() : output
+        outputName = target.flatMap(AudioDevices.name)
 
         guard usingSurround || selection != .off || spatial else { return stop(.off) }
-        guard let stinger = AudioDevices.stingerUID() else {
-            return stop(usingSurround ? .stingerMissing : .notStingerOutput)
-        }
-        guard usingSurround || output == stinger else { return stop(.notStingerOutput) }
+        guard let target else { return stop(.stingerMissing) }
         switch AudioCapturePermission.status {
         case .authorized: break
         case .denied: return stop(.denied)
@@ -132,11 +136,11 @@ final class AudioEffects {
             }
             return
         }
-        let source = usingSurround ? output ?? AudioDevices.surroundUID : stinger
-        if engine.sourceUID != source || engine.outputUID != stinger || !engine.isRunning {
+        let source = usingSurround ? output ?? AudioDevices.surroundUID : target
+        if engine.sourceUID != source || engine.outputUID != target || !engine.isRunning {
             do {
-                try engine.start(sourceUID: source, outputUID: stinger)
-                log.notice("Áudio de \(source, privacy: .public) para o headset, \(self.engine.sampleRate) Hz")
+                try engine.start(sourceUID: source, outputUID: target)
+                log.notice("Áudio de \(source, privacy: .public) para \(target, privacy: .public), \(self.engine.sampleRate) Hz")
             } catch {
                 log.error("Falhou: \(error.localizedDescription, privacy: .public)")
                 return stop(.failed(error.localizedDescription))
@@ -151,7 +155,7 @@ final class AudioEffects {
         state = .active
     }
 
-    /// Liga/desliga a saída 7.1 como saída de som do Mac.
+    /// Liga/desliga a saída 7.1 como saída de som do Mac (desligada, volta ao Stinger).
     func useSurround(_ on: Bool) {
         if on {
             AudioDevices.setDefaultOutput(uid: AudioDevices.surroundUID)

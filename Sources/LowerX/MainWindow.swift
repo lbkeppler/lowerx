@@ -12,13 +12,20 @@ struct MainWindow: View {
 
     enum Page: Hashable {
         case stinger
+        case sound
         case device(UInt32)
         case settings
     }
 
     /// `-initialPage settings` / `-initialTab headset` na linha de comando abrem
     /// direto nessas telas (usado para as capturas do README).
-    @State private var page: Page = UserDefaults.standard.string(forKey: "initialPage") == "settings" ? .settings : .stinger
+    @State private var page: Page = {
+        switch UserDefaults.standard.string(forKey: "initialPage") {
+        case "settings": return .settings
+        case "sound": return .sound
+        default: return .stinger
+        }
+    }()
 
     var body: some View {
         HStack(spacing: 0) {
@@ -34,6 +41,8 @@ struct MainWindow: View {
                     } else {
                         StingerPage(model: model, effects: effects)
                     }
+                case .sound:
+                    SoundPage(effects: effects)
                 case .settings:
                     SettingsPage(discord: discord, effects: effects)
                 }
@@ -74,6 +83,15 @@ struct MainWindow: View {
             .padding(.top, 34)
             .padding(.bottom, 18)
 
+            Text("ÁUDIO")
+                .font(Theme.font(10, .bold)).tracking(1.5)
+                .foregroundStyle(Theme.tertiaryText)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 4)
+            SoundRow(output: effects.outputName ?? "Sem saída", active: effects.state == .active,
+                     selected: page == .sound) { page = .sound }
+                .padding(.bottom, 14)
+
             Text("DISPOSITIVOS")
                 .font(Theme.font(10, .bold)).tracking(1.5)
                 .foregroundStyle(Theme.tertiaryText)
@@ -111,6 +129,39 @@ struct MainWindow: View {
         if !model.headsetOnline { return "Desligado" }
         guard let battery = model.battery else { return "Conectado" }
         return model.charging == .charging ? "Carregando · \(battery)%" : "Bateria \(battery)%"
+    }
+}
+
+private struct SoundRow: View {
+    let output: String
+    let active: Bool
+    let selected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: "waveform")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(active ? Theme.accent : Theme.secondaryText)
+                    .frame(width: 54, height: 36)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Som do Mac").font(Theme.font(13, .medium))
+                    Text(output).font(Theme.font(11)).foregroundStyle(Theme.secondaryText).lineLimit(1)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(8)
+            .background(selected ? Theme.cardRaised : .clear, in: RoundedRectangle(cornerRadius: 10))
+            .overlay(alignment: .leading) {
+                if selected {
+                    RoundedRectangle(cornerRadius: 2).fill(Theme.accent).frame(width: 3, height: 26).offset(x: -1)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 8)
     }
 }
 
@@ -246,71 +297,7 @@ private struct StingerPage: View {
     // MARK: Áudio
 
     private var audioTab: some View {
-        VStack(spacing: 18) {
-            Card("Equalizador", trailing: effects.selection == .custom
-                 ? AnyView(Button("Zerar") { effects.customGains = Equalizer.flat }
-                    .buttonStyle(.plain).font(Theme.font(12, .medium)).foregroundStyle(Theme.accent))
-                 : nil) {
-                presetChips
-                EqualizerGraph(gains: effects.gains, enabled: effects.selection != .off) { band, gain in
-                    // Mexer num preset vira "Personalizado" a partir dele.
-                    if effects.selection != .custom {
-                        effects.customGains = effects.gains
-                        effects.selection = .custom
-                    }
-                    effects.customGains[band] = gain
-                }
-                .frame(height: 230)
-                if effects.selection == .off {
-                    Text("Escolha um preset ou arraste os pontos para criar o seu.")
-                        .font(Theme.font(12)).foregroundStyle(Theme.tertiaryText)
-                }
-            }
-            HStack(alignment: .top, spacing: 18) {
-                Card("Espacial") {
-                    SettingRow(title: "Som à frente",
-                               detail: "Músicas e vídeos em estéreo soam como alto-falantes à sua frente.") {
-                        Toggle("", isOn: $effects.spatial).toggleStyle(.switch).labelsHidden().tint(Theme.accent)
-                    }
-                }
-                Card("Surround 7.1") { surroundCard }
-            }
-            if let message = effects.statusMessage {
-                Label(message, systemImage: "info.circle")
-                    .font(Theme.font(12)).foregroundStyle(Theme.secondaryText)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-        }
-    }
-
-    private var presetChips: some View {
-        let options: [(AudioEffects.Selection, String)] = [(.off, "Desligado")]
-            + Equalizer.Preset.allCases.map { (.preset($0), $0.title) }
-            + [(.custom, "Personalizado")]
-        return PillPicker(options: options, selection: $effects.selection)
-    }
-
-    @ViewBuilder
-    private var surroundCard: some View {
-        if effects.surroundInstalled {
-            SettingRow(title: "Saída 7.1",
-                       detail: effects.usingSurround
-                           ? "Jogos e filmes em 7.1, posicionados em 3D."
-                           : "Apps passam a ver uma saída 7.1.") {
-                Toggle("", isOn: Binding(get: { effects.usingSurround }, set: { effects.useSurround($0) }))
-                    .toggleStyle(.switch).labelsHidden().tint(Theme.accent)
-            }
-        } else {
-            SettingRow(title: "Saída 7.1",
-                       detail: effects.surroundNeedsUpdate
-                           ? "Atualiza a saída antiga “HeadsetBar 7.1” para “LowerX 7.1”."
-                           : "Instala uma saída de som 7.1 que toca neste headset.") {
-                Button(effects.installing ? "Instalando…" : effects.surroundNeedsUpdate ? "Atualizar" : "Instalar") {
-                    effects.installSurround()
-                }
-                    .disabled(effects.installing)
-            }
-        }
+        AudioEffectsSection(effects: effects, showSurround: true)
     }
 
     // MARK: Headset
@@ -396,6 +383,116 @@ struct BatteryBar: View {
     }
 }
 
+// MARK: - Efeitos de áudio (qualquer saída)
+
+/// EQ e espacial, aplicados na saída de som atual do Mac (qualquer fone ou alto-falante).
+/// A Saída 7.1 só aparece na página do Stinger, o único fone em que ela foi validada.
+struct AudioEffectsSection: View {
+    @Bindable var effects: AudioEffects
+    var showSurround = false
+
+    var body: some View {
+        VStack(spacing: 18) {
+            Card("Equalizador", trailing: AnyView(trailing)) {
+                presetChips
+                EqualizerGraph(gains: effects.gains, enabled: effects.selection != .off) { band, gain in
+                    // Mexer num preset vira "Personalizado" a partir dele.
+                    if effects.selection != .custom {
+                        effects.customGains = effects.gains
+                        effects.selection = .custom
+                    }
+                    effects.customGains[band] = gain
+                }
+                .frame(height: 230)
+                if effects.selection == .off {
+                    Text("Escolha um preset ou arraste os pontos para criar o seu.")
+                        .font(Theme.font(12)).foregroundStyle(Theme.tertiaryText)
+                }
+            }
+            HStack(alignment: .top, spacing: 18) {
+                Card("Espacial") {
+                    SettingRow(title: "Som à frente",
+                               detail: "Músicas e vídeos em estéreo soam como alto-falantes à sua frente. Feito para fones.") {
+                        Toggle("", isOn: $effects.spatial).toggleStyle(.switch).labelsHidden().tint(Theme.accent)
+                    }
+                }
+                if showSurround {
+                    Card("Surround 7.1") { surroundCard }
+                }
+            }
+            if let message = effects.statusMessage {
+                Label(message, systemImage: "info.circle")
+                    .font(Theme.font(12)).foregroundStyle(Theme.secondaryText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    /// Onde os efeitos estão sendo aplicados, e o "Zerar" do modo personalizado.
+    private var trailing: some View {
+        HStack(spacing: 14) {
+            if let name = effects.outputName {
+                Label(name, systemImage: effects.usingSurround ? "hifispeaker.2" : "headphones")
+                    .font(Theme.font(12, .medium)).foregroundStyle(Theme.secondaryText).lineLimit(1)
+            }
+            if effects.selection == .custom {
+                Button("Zerar") { effects.customGains = Equalizer.flat }
+                    .buttonStyle(.plain).font(Theme.font(12, .medium)).foregroundStyle(Theme.accent)
+            }
+        }
+    }
+
+    private var presetChips: some View {
+        let options: [(AudioEffects.Selection, String)] = [(.off, "Desligado")]
+            + Equalizer.Preset.allCases.map { (.preset($0), $0.title) }
+            + [(.custom, "Personalizado")]
+        return PillPicker(options: options, selection: $effects.selection)
+    }
+
+    @ViewBuilder
+    private var surroundCard: some View {
+        if effects.surroundInstalled {
+            SettingRow(title: "Saída 7.1",
+                       detail: effects.usingSurround
+                           ? "Jogos e filmes em 7.1, posicionados em 3D."
+                           : "Apps passam a ver uma saída 7.1 que toca no Stinger 2.") {
+                Toggle("", isOn: Binding(get: { effects.usingSurround }, set: { effects.useSurround($0) }))
+                    .toggleStyle(.switch).labelsHidden().tint(Theme.accent)
+            }
+        } else {
+            SettingRow(title: "Saída 7.1",
+                       detail: effects.surroundNeedsUpdate
+                           ? "Atualiza a saída antiga “HeadsetBar 7.1” para “LowerX 7.1”."
+                           : "Instala uma saída de som 7.1 que toca no Stinger 2.") {
+                Button(effects.installing ? "Instalando…" : effects.surroundNeedsUpdate ? "Atualizar" : "Instalar") {
+                    effects.installSurround()
+                }
+                .disabled(effects.installing)
+            }
+        }
+    }
+}
+
+/// Página "Som do Mac": EQ e espacial para qualquer saída, com ou sem o Stinger.
+private struct SoundPage: View {
+    let effects: AudioEffects
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("SOM DO MAC").font(Theme.font(26, .black)).tracking(1)
+                    Text("Equalizador e espacial em qualquer fone ou alto-falante: valem para a saída de som escolhida no Mac.")
+                        .font(Theme.font(13)).foregroundStyle(Theme.secondaryText)
+                }
+                AudioEffectsSection(effects: effects)
+            }
+            .padding(28)
+        }
+        .scrollIndicators(.hidden)
+    }
+}
+
 // MARK: - Outros aparelhos
 
 private struct OtherDevicePage: View {
@@ -475,8 +572,7 @@ extension AudioEffects {
     var statusMessage: String? {
         switch state {
         case .active, .off: return nil
-        case .notStingerOutput: return "Os efeitos ativam quando a saída de som do Mac for o headset ou a Saída 7.1."
-        case .stingerMissing: return "A Saída 7.1 toca no headset: conecte o receptor."
+        case .stingerMissing: return "A Saída 7.1 toca no Stinger 2: conecte o receptor."
         case .waitingPermission: return "Aguardando a permissão de áudio do sistema…"
         case .denied: return "Permita “LowerX” em Ajustes › Privacidade › Gravação de tela e áudio do sistema."
         case .failed(let message): return "Falhou: \(message)"

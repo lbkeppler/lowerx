@@ -2,14 +2,15 @@ import CoreAudio
 import Foundation
 import os
 
-/// Leva o áudio do sistema pelos efeitos até o headset, sem driver de terceiros: um
-/// "process tap" do Core Audio (macOS 14.2+) captura o que os apps mandam para a
-/// origem, um aggregate device privado junta o tap e o Stinger, e o IOProc dele
-/// escreve no Stinger o áudio processado.
+/// Leva o áudio do sistema pelos efeitos até uma saída de som, sem driver de terceiros:
+/// um "process tap" do Core Audio (macOS 14.2+) captura o que os apps mandam para a
+/// origem, um aggregate device privado junta o tap e a saída, e o IOProc dele escreve
+/// na saída o áudio processado.
 ///
-/// A origem é o próprio Stinger (estéreo; o tap usa `mutedWhenTapped`, então se o app
-/// parar ou fechar o som volta direto ao normal) ou a saída virtual "LowerX 7.1"
-/// (8 canais, instalada pelo app; o driver não toca nada sozinho).
+/// A origem é a própria saída (qualquer fone ou alto-falante; o tap usa
+/// `mutedWhenTapped`, então se o app parar ou fechar o som volta direto ao normal) ou
+/// a saída virtual "LowerX 7.1" (8 canais, instalada pelo app; o driver não toca nada
+/// sozinho), que toca no Stinger.
 final class SystemAudioEQ {
     struct Failure: LocalizedError {
         let step: String
@@ -288,6 +289,17 @@ enum AudioDevices {
             return nil
         }
         return uid(id)
+    }
+
+    static func isSurround(_ uid: String) -> Bool {
+        uid == surroundUID || uid == legacySurroundUID
+    }
+
+    static func name(uid wanted: String) -> String? {
+        guard let id = deviceID(uid: wanted) else { return nil }
+        var name: Unmanaged<CFString>?
+        guard get(id, kAudioObjectPropertyName, &name), let name else { return nil }
+        return name.takeRetainedValue() as String
     }
 
     static func deviceID(uid wanted: String) -> AudioObjectID? {
