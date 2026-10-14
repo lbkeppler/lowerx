@@ -1,125 +1,153 @@
 <p align="center">
-  <img src="docs/images/icon.png" width="128" alt="Ícone do LowerX">
+  <img src="docs/images/icon.png" width="128" alt="LowerX icon">
 </p>
 
 <h1 align="center">LowerX</h1>
 
 <p align="center">
-  Controle não oficial do <b>HyperX Cloud Stinger 2 Wireless</b> para macOS.<br>
-  O NGENUITY só existe para Windows; o LowerX faz o mesmo papel no Mac.
+  <b>English</b> · <a href="README.pt-BR.md">Português</a> · <a href="README.es.md">Español</a>
 </p>
 
 <p align="center">
-  <img src="docs/images/audio.png" width="820" alt="Janela principal do LowerX, aba Áudio">
+  Unofficial macOS companion for the <b>HyperX Cloud Stinger 2 Wireless</b>.<br>
+  NGENUITY only exists for Windows; LowerX does the same job on the Mac.
 </p>
-
-## O que faz
-
-- **Bateria, carga e estado do headset**, com o percentual na barra de menus.
-- **Microfone**: mostra se está mutado (haste levantada) em tempo real.
-- **Sidetone**: liga/desliga e escolhe entre os níveis **Padrão** (−25 dB, de fábrica) e **Otimizado** (−12 dB).
-- **Desligamento automático**: nunca, 10, 20 ou 30 minutos.
-- **Equalizador de 10 bandas** com os presets oficiais do NGENUITY (Mais graves, Menos graves, Mais agudos, Menos agudos, Voz, Jogos, Equilibrado) e um modo personalizado: arraste os pontos do gráfico.
-- **Espacial**: músicas e vídeos em estéreo soam como alto-falantes à sua frente (HRTF da Apple).
-- **Saída 7.1**: uma saída de som virtual com 8 canais. Jogos e filmes em 7.1 têm cada canal posicionado em 3D no fone.
-- **Certificado no Discord**: o Discord passa a reconhecer o headset, como faz com o NGENUITY no Windows.
-- **Outros aparelhos HyperX**: reconhece 56 modelos (159 IDs USB) e mostra a foto de cada um. Controles para eles ainda não existem.
 
 <p align="center">
-  <img src="docs/images/headset.png" width="560" alt="Aba Headset">
-  <img src="docs/images/panel.png" width="250" alt="Painel da barra de menus">
+  <img src="docs/images/audio.png" width="820" alt="LowerX main window, Audio tab">
 </p>
 
-## Requisitos
+## Features
 
-- macOS 14.2 ou mais recente.
-- HyperX Cloud Stinger 2 Wireless (receptor USB `03F0:0D93`).
-- Xcode (ou as Command Line Tools) para compilar.
+- **Battery, charging and headset status**, with the percentage in the menu bar.
+- **Microphone**: shows in real time whether it is muted (boom raised).
+- **Sidetone**: on/off plus two levels, **Padrão** (Standard, −25 dB, factory) and **Otimizado** (Optimized, −12 dB).
+- **Auto power-off**: never, 10, 20 or 30 minutes.
+- **10-band equalizer** with NGENUITY's official presets (Bass Boost, Bass Cut, Treble Boost, Treble Cut, Voice Chat, Gaming, Balanced) and a custom mode: drag the points on the graph.
+- **Spatial**: stereo music and video sound like speakers in front of you (Apple's HRTF).
+- **7.1 output**: a virtual 8-channel sound output. Games and movies in 7.1 get each channel placed in 3D on the headset.
+- **Discord certification**: Discord recognizes the headset, as it does with NGENUITY on Windows.
+- **Other HyperX devices**: recognizes 56 models (159 USB IDs) and shows a photo of each. They have no controls yet.
 
-## Compilar e instalar
+The interface is currently in Portuguese (pt-BR). [Translations are welcome!](#contributing)
+
+<p align="center">
+  <img src="docs/images/headset.png" width="560" alt="Headset tab">
+  <img src="docs/images/panel.png" width="250" alt="Menu bar panel">
+</p>
+
+## Supported devices
+
+| Device | Status |
+|---|---|
+| HyperX Cloud Stinger 2 Wireless | ✅ Full support |
+| 55 other HyperX models (headsets, keyboards, mice, microphones, mouse pads) | 🔍 Detected with name and photo, no controls yet. [Contributions welcome!](#contributing) |
+
+## Requirements
+
+- macOS 14.2 or later.
+- HyperX Cloud Stinger 2 Wireless (USB receiver `03F0:0D93`).
+- Xcode (or the Command Line Tools) to build.
+
+## Build and install
 
 ```sh
-./build-app.sh          # compila e instala em ~/Applications/LowerX.app
+./build-app.sh          # builds and installs ~/Applications/LowerX.app
 ```
 
-O app é assinado ad-hoc. Na primeira vez que o equalizador ou o espacial for usado, o macOS pede a permissão de **gravação de áudio do sistema**. A **Saída 7.1** é instalada pelo próprio app (pede a senha de administrador).
+The app is ad-hoc signed. The first time the equalizer or spatial is used, macOS asks for the **system audio recording** permission. The **7.1 output** is installed by the app itself (it asks for the administrator password).
 
-Para a Saída 7.1 tocar depois de reiniciar o Mac, ative **Abrir no login** em Ajustes.
+For the 7.1 output to play after a restart, turn on **Abrir no login** (Open at login) in Settings.
 
 <p align="center">
-  <img src="docs/images/settings.png" width="560" alt="Ajustes">
+  <img src="docs/images/settings.png" width="560" alt="Settings">
 </p>
 
-## Como funciona
+## How it works
 
-### Protocolo do headset
+### Headset protocol
 
-O controle foi reconstruído a partir do `NGenuity2Helper.exe` (parte do instalador do NGENUITY 2.38) e conferido no aparelho. Tudo passa por reports HID de 20 bytes na coleção vendor `0xFF90`/`0x0303`, no formato `06 FF BB <cmd> <valor>`:
+The protocol was reconstructed from `NGenuity2Helper.exe` (part of the NGENUITY 2.38 installer) and verified on the device. Everything goes through 20-byte HID reports on the vendor collection `0xFF90`/`0x0303`, formatted as `06 FF BB <cmd> <value>`:
 
-| cmd | função | resposta |
+| cmd | function | response |
 |---|---|---|
-| `01` | status | `r[4]` = 1 ou 4: headset ligado; 3: desligado |
-| `02` | bateria | `r[7]` = % |
-| `03` | carga | 1 carregando · 2 completa · 3 erro |
-| `05` | microfone | 1 = mutado |
-| `06` / `21` | ler / ligar sidetone | |
-| `07` / `22` | ler / definir desligamento automático (min) | |
-| `0B` / `23` | ler / definir nível do sidetone (dB com sinal) | |
-| `20` | evento espontâneo da haste do microfone | 1 = mutado |
+| `01` | status | `r[4]` = 1 or 4: headset on; 3: off |
+| `02` | battery | `r[7]` = % |
+| `03` | charging | 1 charging · 2 full · 3 error |
+| `05` | microphone | 1 = muted |
+| `06` / `21` | read / set sidetone on | |
+| `07` / `22` | read / set auto power-off (min) | |
+| `0B` / `23` | read / set sidetone level (signed dB) | |
+| `20` | spontaneous microphone boom event | 1 = muted |
 
-Os comandos de escrita ecoam `cmd valor 01` para todos os programas conectados. O nível do sidetone só é aplicado quando o sidetone é ligado, por isso o app desliga e religa ao trocar o nível.
+Write commands echo `cmd value 01` to every connected program. The sidetone level only takes effect when sidetone is switched on, so the app turns it off and on again when the level changes.
 
-> ⚠️ O nível do sidetone é um ganho em dB com sinal: valores positivos amplificam muito (`0x20` = +32 dB é ensurdecedor). O app só envia os dois níveis testados.
+> ⚠️ The sidetone level is a signed dB gain: positive values amplify a lot (`0x20` = +32 dB is deafening). The app only sends the two tested levels.
 
-### Equalizador e espacial
+### Equalizer and spatial
 
-No Windows, EQ e espacial são o DTS Headphone:X, um efeito de áudio do sistema; nada disso roda no headset. No Mac:
+On Windows, EQ and spatial are DTS Headphone:X, a system audio effect; none of it runs on the headset. On the Mac:
 
-1. Um **process tap** do Core Audio (macOS 14.2+) captura o áudio que os apps mandam para o headset e silencia o original.
-2. Um aggregate device privado junta o tap e o headset; o IOProc dele processa e toca o resultado.
-3. Cadeia: origem → espacial (`AUSpatialMixer`, HRTF) → EQ (10 biquads por canal, pré-ganho anti-clipping) → headset.
+1. A Core Audio **process tap** (macOS 14.2+) captures the audio apps send to the headset and mutes the original.
+2. A private aggregate device joins the tap and the headset; its IOProc processes and plays the result.
+3. Chain: source → spatial (`AUSpatialMixer`, HRTF) → EQ (10 biquads per channel, anti-clipping pre-gain) → headset.
 
-Se o app fechar, o tap some e o som volta ao normal.
+If the app quits, the tap goes away and sound returns to normal.
 
-No espacial, o que é igual nos dois canais vai só para um alto-falante virtual central. Tocar o mesmo sinal em dois alto-falantes virtuais cria buracos no espectro (−15 dB em 2 kHz) e deixa tudo abafado.
+In spatial mode, whatever is identical in both channels goes to a single center virtual speaker. Playing the same signal on two virtual speakers creates notches in the spectrum (−15 dB at 2 kHz) and makes everything sound muffled.
 
-### Saída 7.1
+### 7.1 output
 
-`Driver/LowerX71.c` é um driver AudioServerPlugIn próprio: uma saída de 8 canais (L R C LFE Ls Rs Rls Rrs) que só fornece o relógio e descarta o áudio. O app captura essa saída com o mesmo tap e posiciona cada canal: frentes a ±30°, centro a 0°, laterais a ±90° e traseiras a ±150°. Quando um app manda só estéreo para ela, o espacial decide como tocar.
+`Driver/LowerX71.c` is a custom AudioServerPlugIn driver: an 8-channel output (L R C LFE Ls Rs Rls Rrs) that only provides the clock and discards the audio. The app captures that output with the same tap and places each channel: fronts at ±30°, center at 0°, sides at ±90° and rears at ±150°. When an app sends only stereo to it, the spatial setting decides how it plays.
 
 ### Discord
 
-O app chama o RPC local do Discord (`127.0.0.1:6463–6472`) com `SET_CERTIFIED_DEVICES` e o `client_id` da HyperX, usando o UID Core Audio do headset, igual ao NGENUITY.
+The app calls Discord's local RPC (`127.0.0.1:6463–6472`) with `SET_CERTIFIED_DEVICES` and HyperX's `client_id`, using the headset's Core Audio UID, just like NGENUITY.
 
-## Estrutura
+## Project layout
 
 ```
 Sources/LowerX/
-  StingerProtocol.swift   comandos e respostas do headset
+  StingerProtocol.swift   headset commands and responses
   HIDTransport.swift      IOHIDManager
-  HeadsetModel.swift      estado e fila de comandos (120 ms entre envios)
-  SystemAudioEQ.swift     tap + aggregate device + cadeia de efeitos
-  SpatialRenderer.swift   upmix e AUSpatialMixer
-  Equalizer.swift         presets e filtros
-  AudioEffects.swift      quando ligar o pipeline, Saída 7.1, permissões
-  DiscordCertifier.swift  certificação no Discord
-  USBDeviceWatcher.swift  outros aparelhos HyperX (IOKit, sem permissão de entrada)
-  DeviceCatalog.swift     gerado de tools/
-  MainWindow.swift, LowerXApp.swift, Theme.swift, EqualizerGraph.swift   interface
-Driver/                   saída virtual 7.1
-tools/                    scripts para regenerar catálogo, imagens e ícone
+  HeadsetModel.swift      state and command queue (120 ms between sends)
+  SystemAudioEQ.swift     tap + aggregate device + effects chain
+  SpatialRenderer.swift   upmix and AUSpatialMixer
+  Equalizer.swift         presets and filters
+  AudioEffects.swift      when to run the pipeline, 7.1 output, permissions
+  DiscordCertifier.swift  Discord certification
+  USBDeviceWatcher.swift  other HyperX devices (IOKit, no input monitoring permission)
+  DeviceCatalog.swift     generated from tools/
+  MainWindow.swift, LowerXApp.swift, Theme.swift, EqualizerGraph.swift   UI
+Driver/                   virtual 7.1 output
+tools/                    scripts to regenerate the catalog, images and icon
 ```
 
-### Ferramentas
+### Tools
 
-| script | o que gera |
+| script | generates |
 |---|---|
-| `tools/extract_catalog.py` + `tools/gen_catalog_swift.py` | `DeviceCatalog.swift`, a partir do `NGenuity2Helper.exe` decompilado com `ilspycmd` |
-| `tools/prepare_device_images.py` | `Assets/Devices`, uma imagem por modelo, a partir de `Assets/Devices` do pacote do NGENUITY |
+| `tools/extract_catalog.py` + `tools/gen_catalog_swift.py` | `DeviceCatalog.swift`, from `NGenuity2Helper.exe` decompiled with `ilspycmd` |
+| `tools/prepare_device_images.py` | `Assets/Devices`, one image per model, from `Assets/Devices` in the NGENUITY package |
 | `tools/make_icon.swift` | `Assets/AppIcon.icns` |
 
-## Créditos
+## Contributing
 
-- Imagens dos produtos: **HyperX**, dos materiais de imprensa de cada produto.
-- Fonte [Saira](https://github.com/Omnibus-Type/Saira), licença SIL Open Font License (`Assets/Fonts/OFL.txt`).
-- HyperX, NGENUITY e Cloud Stinger são marcas da HP Inc. O LowerX é um projeto independente, sem afiliação com a HyperX ou a HP.
+Improvements are very welcome, and so are pull requests! 🙌
+
+Some ideas:
+
+- **Other HyperX devices.** The protocols are in NGENUITY: decompile `NGenuity2Helper.exe` with `ilspycmd`; each device's classes live in `NGenuity2.Devices.*`. If you own the device, implement it, test it and send a PR. Start with reads (battery, status) before write commands.
+- **EQ, spatial and 7.1 output for any headphones**, not just the Stinger 2.
+- **UI translations**: the interface is currently in Portuguese.
+- **Bugs and suggestions**: open an issue.
+
+When sending a PR, describe what you tested and on which device and macOS version. Please don't include installer files or decompiled NGENUITY code.
+
+> ⚠️ Be careful when testing write commands: gains may be in dB (sidetone at +32 dB was deafening). Start with low values and the headset away from your ears.
+
+## Credits
+
+- Product images: **HyperX**, from each product's press materials.
+- [Saira](https://github.com/Omnibus-Type/Saira) font, SIL Open Font License (`Assets/Fonts/OFL.txt`).
+- HyperX, NGENUITY and Cloud Stinger are trademarks of HP Inc. LowerX is an independent project, not affiliated with HyperX or HP.
