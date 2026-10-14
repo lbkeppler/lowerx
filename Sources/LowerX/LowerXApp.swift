@@ -3,6 +3,7 @@ import SwiftUI
 
 @main
 struct LowerXApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     // Precisa vir antes dos modelos: eles leem os ajustes ao serem criados.
     private let migrated: Void = LowerXApp.migrateDefaults()
     @State private var model = HeadsetModel()
@@ -48,6 +49,27 @@ struct LowerXApp: App {
         for key in ["eqSelection", "eqCustomGains", "spatial", "discordCertify"] {
             if let value = old.object(forKey: key) { defaults.set(value, forKey: key) }
         }
+    }
+}
+
+/// "Encerrar" no Dock ou Cmd-Q na janela só fecham a janela: o LowerX continua na
+/// barra de menus (a Saída 7.1 e os efeitos dependem dele rodando). Sai de verdade
+/// pelo botão de desligar do painel ou quando o Mac encerra a sessão.
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    static var quitRequested = false
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        if Self.quitRequested || Self.systemIsQuitting { return .terminateNow }
+        for window in sender.windows where window.isVisible { window.close() }
+        sender.setActivationPolicy(.accessory)
+        return .terminateCancel
+    }
+
+    /// Logout, reinício e desligamento mandam o "quit" com um motivo.
+    private static var systemIsQuitting: Bool {
+        guard let event = NSAppleEventManager.shared().currentAppleEvent,
+              event.eventClass == kCoreEventClass, event.eventID == kAEQuitApplication else { return false }
+        return event.attributeDescriptor(forKeyword: AEKeyword(kAEQuitReason)) != nil
     }
 }
 
@@ -240,7 +262,10 @@ struct MenuPanel: View {
                     .background(Theme.accent, in: RoundedRectangle(cornerRadius: 8))
             }
             .buttonStyle(.plain)
-            Button { NSApplication.shared.terminate(nil) } label: {
+            Button {
+                AppDelegate.quitRequested = true
+                NSApplication.shared.terminate(nil)
+            } label: {
                 Image(systemName: "power")
                     .frame(width: 34, height: 32)
                     .background(Theme.cardRaised, in: RoundedRectangle(cornerRadius: 8))
