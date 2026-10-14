@@ -50,7 +50,7 @@
 ## Compilar e instalar
 
 ```sh
-./build-app.sh          # compila e instala em ~/Applications/LowerX.app
+./build-app.sh          # compila e instala em /Applications/LowerX.app
 ```
 
 O app é assinado ad-hoc. Na primeira vez que o equalizador ou o espacial for usado, o macOS pede a permissão de **gravação de áudio do sistema**. A **Saída 7.1** é instalada pelo próprio app (pede a senha de administrador).

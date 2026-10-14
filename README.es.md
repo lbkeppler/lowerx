@@ -52,7 +52,7 @@ Por ahora la interfaz está en portugués (pt-BR). [¡Las traducciones son bienv
 ## Compilar e instalar
 
 ```sh
-./build-app.sh          # compila e instala ~/Applications/LowerX.app
+./build-app.sh          # compila e instala /Applications/LowerX.app
 ```
 
 La app está firmada ad-hoc. La primera vez que se usa el ecualizador o el espacial, macOS pide el permiso de **grabación de audio del sistema**. La **salida 7.1** la instala la propia app (pide la contraseña de administrador).

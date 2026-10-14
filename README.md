@@ -52,7 +52,7 @@ The interface is currently in Portuguese (pt-BR). [Translations are welcome!](#c
 ## Build and install
 
 ```sh
-./build-app.sh          # builds and installs ~/Applications/LowerX.app
+./build-app.sh          # builds and installs /Applications/LowerX.app
 ```
 
 The app is ad-hoc signed. The first time the equalizer or spatial is used, macOS asks for the **system audio recording** permission. The **7.1 output** is installed by the app itself (it asks for the administrator password).

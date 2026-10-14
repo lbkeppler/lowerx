@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Compila em release e monta LowerX.app (app só de barra de menus, assinatura ad-hoc).
 # O bundle é montado fora deste volume (exFAT cria arquivos ._* que quebram o codesign)
-# e instalado em ~/Applications (ou em DEST=/outro/lugar).
+# e instalado em /Applications (ou em DEST=/outro/lugar).
 set -euo pipefail
 cd "$(dirname "$0")"
 
 swift build -c release
-DEST="${DEST:-$HOME/Applications}"
+DEST="${DEST:-/Applications}"
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 APP="$STAGE/LowerX.app"
