@@ -195,10 +195,6 @@ struct MenuPanel: View {
 
     private var audioSection: some View {
         PanelSection("Áudio") {
-            if let name = effects.outputName {
-                Label(name, systemImage: effects.usingSurround ? "hifispeaker.2" : "headphones")
-                    .font(Theme.font(11)).foregroundStyle(Theme.secondaryText).lineLimit(1)
-            }
             SettingRow(title: "Equalizador") {
                 Picker("", selection: $effects.selection) {
                     Text("Desligado").tag(AudioEffects.Selection.off)

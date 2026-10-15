@@ -23,8 +23,8 @@
 - **Microfone**: mostra se está mutado (haste levantada) em tempo real.
 - **Sidetone**: liga/desliga e escolhe entre os níveis **Padrão** (−25 dB, de fábrica) e **Otimizado** (−12 dB).
 - **Desligamento automático**: nunca, 10, 20 ou 30 minutos.
-- **Equalizador de 10 bandas** (funciona em qualquer fone ou alto-falante) com os presets oficiais do NGENUITY (Mais graves, Menos graves, Mais agudos, Menos agudos, Voz, Jogos, Equilibrado) e um modo personalizado: arraste os pontos do gráfico.
-- **Espacial** (qualquer fone): músicas e vídeos em estéreo soam como alto-falantes à sua frente (HRTF da Apple).
+- **Equalizador de 10 bandas** com os presets oficiais do NGENUITY (Mais graves, Menos graves, Mais agudos, Menos agudos, Voz, Jogos, Equilibrado) e um modo personalizado: arraste os pontos do gráfico.
+- **Espacial**: músicas e vídeos em estéreo soam como alto-falantes à sua frente (HRTF da Apple).
 - **Saída 7.1**: uma saída de som virtual com 8 canais. Jogos e filmes em 7.1 têm cada canal posicionado em 3D no fone.
 - **Certificado no Discord**: o Discord passa a reconhecer o headset, como faz com o NGENUITY no Windows.
 - **Outros aparelhos HyperX**: reconhece 56 modelos (159 IDs USB) e mostra a foto de cada um. Controles para eles ainda não existem.
@@ -39,7 +39,6 @@
 | Aparelho | Situação |
 |---|---|
 | HyperX Cloud Stinger 2 Wireless | ✅ Completo |
-| Qualquer fone ou alto-falante | 🎧 Equalizador e espacial (a Saída 7.1 ainda é só do Stinger 2) |
 | Outros 55 modelos HyperX (headsets, teclados, mouses, microfones, mousepads) | 🔍 Detectados com nome e foto, ainda sem controles. [Contribuições são bem-vindas!](#contribuindo) |
 
 ## Requisitos
@@ -137,7 +136,7 @@ Melhorias são muito bem-vindas, e pull requests também! 🙌
 Algumas ideias:
 
 - **Outros aparelhos HyperX.** Os protocolos estão no NGENUITY: decompile o `NGenuity2Helper.exe` com o `ilspycmd`; as classes de cada aparelho ficam em `NGenuity2.Devices.*`. Se você tem o aparelho, implemente, teste e mande um PR. Comece pelas leituras (bateria, estado) antes dos comandos de escrita.
-- **Saída 7.1 em outros fones**: funciona no Stinger 2; testes em outros fones são bem-vindos.
+- **EQ, Espacial e Saída 7.1 em qualquer fone**, não só no Stinger 2.
 - **Tradução da interface**, que hoje está em português.
 - **Bugs e sugestões**: abra uma issue.
 
